@@ -1,0 +1,41 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "C:\\Users\\antho\\Documents\\PRO\\ISITECH\\BlockChain\\TP_Vote\\mon-app\\hardhat\\contracts\\SmartContract.sol": {
+      "lastModificationDate": 1775805453671,
+      "contentHash": "4653f9b0ed464cf06caf6fb6c448693c",
+      "sourceName": "contracts/SmartContract.sol",
+      "solcConfig": {
+        "version": "0.8.28",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.28"
+      ],
+      "artifacts": [
+        "Vote"
+      ]
+    }
+  }
+}
