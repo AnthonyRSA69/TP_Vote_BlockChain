@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
 contract Vote {
@@ -28,9 +29,9 @@ contract Vote {
     }
 
     function ownerOf(uint256 tokenId) external view returns (address) { // Retourne le owner du jeton via l'id du jeton
-        address owner = _owners[tokenId];
-        require(owner != address(0), "Le Token n'existe pas");
-        return owner;
+        address ownerToken = _owners[tokenId];
+        require(ownerToken != address(0), "Le Token n'existe pas");
+        return ownerToken;
     }
 
     //=======================MINT=============================
@@ -67,10 +68,10 @@ contract Vote {
         return candidates.length;
     }
 
-    function getCandidat(uint256 idCandidat) external view returns (string candidateName, uint256 nb_vote)
+    function getCandidat(uint256 idCandidat) external view returns (string memory candidateName, uint256 nb_vote) // on mets memory car ca marche pas sinon dans les test hardhat
     {
         require(idCandidat < candidates.length, "Candidat inexistant dans les candidats participant");
-        Candidate c = candidates[idCandidat];
+        Candidate memory c = candidates[idCandidat]; // pareil ici
         return (c.name, c.nb_vote);
     }
 
@@ -94,7 +95,7 @@ contract Vote {
         _;
     }
 
-    constructor(string[] candidateNames) {  // on prend une liste de candidat en parametre qui seront ceux pour qui on peut voter
+    constructor(string[] memory candidateNames) {  // on prend une liste de candidat en parametre qui seront ceux pour qui on peut voter
         require(candidateNames.length >= 2, "Need at least 2 candidates");
 
         owner = msg.sender;
@@ -106,14 +107,14 @@ contract Vote {
     }
 
     function addVoter(address votant) external onlyOwner { // on permet a l'admin uniquement d'ajouter des votant
-        require(votant != address(0), "Aucune adresse renseignée");
-        require(!isVotant[votant], "Adresse est déjà un votant");
+        require(votant != address(0), "Aucune adresse renseignee");
+        require(!isVotant[votant], "Adresse est deja un votant");
         isVotant[votant] = true;
         emit VotantAjouter(votant);
     }
 
     function startVote() external onlyOwner { // Permet d'ouvrir les vote
-        require(!voteOuvert, "Les votes sont déjà ouvert");
+        require(!voteOuvert, "Les votes sont deja ouvert");
         voteOuvert = true;
         emit VoteCommencer();
     }

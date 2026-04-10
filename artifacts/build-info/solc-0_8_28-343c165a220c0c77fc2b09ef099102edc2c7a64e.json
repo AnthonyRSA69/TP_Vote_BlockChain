@@ -1,0 +1,36 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-343c165a220c0c77fc2b09ef099102edc2c7a64e",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "compilerType": "solc",
+  "userSourceNameMap": {
+    "contracts/SmartContract.sol": "project/contracts/SmartContract.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/SmartContract.sol": {
+        "content": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.28;\r\n\r\ncontract Vote {\r\n// ==================PARTIE JETON=================================\r\n    //==============Initialisation des variables==========================\r\n    \r\n    string public name   = \"JetonVote\"; // Nom du jetoh comem sur openzeppelin\r\n    string public symbol = \"VOTE\"; // Symbole du jeton\r\n\r\n    mapping(uint256 => address) private _owners;  // TokenId pour que ce soit unique (nft)\r\n    mapping(address => uint256) private _balances; // relier l'adresse au nombre de jeton\r\n\r\n    uint256 private idToken; //id de jeton en cours (compteur)\r\n    uint256 private nb_token; //nbre de jeton (compteur)\r\n\r\n    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);\r\n\r\n\r\n    //========================================Lecture Jeton==================================\r\n\r\n    function totalToken() external view returns (uint256) {     // Retourne le nombre total de jeton \r\n        return nb_token;\r\n    }\r\n\r\n    function balanceOf(address _owner) external view returns (uint256) { // Retourne le nombre de jeton possédant le propriétaire de l'adresse comme dans le tp ERC20\r\n        require(_owner != address(0), \"Aucunde adresse\");\r\n        return _balances[_owner];\r\n    }\r\n\r\n    function ownerOf(uint256 tokenId) external view returns (address) { // Retourne le owner du jeton via l'id du jeton\r\n        address ownerToken = _owners[tokenId];\r\n        require(ownerToken != address(0), \"Le Token n'existe pas\");\r\n        return ownerToken;\r\n    }\r\n\r\n    //=======================MINT=============================\r\n\r\n    function _mint(address to, uint256 tokenId) internal {\r\n        require(to != address(0), \"Aucune adresse\"); // on verifie que l'adresse exitse bien\r\n\r\n        _owners[tokenId]= to;   // on affecte le jeon en coursa la personne votante (via l'adresse)\r\n        _balances[to]+= 1;      // on ajoute le nombre de jeton a la personne qqui a vote \r\n        nb_token+= 1;\r\n\r\n        emit Transfer(address(0), to, tokenId);\r\n    }\r\n//==================FIN PARTIE JETON====================================\r\n\r\n//==================PARTIE VOTE====================================\r\n\r\n    //================Initialisation des variables====================\r\n\r\n    struct Candidate {string  name; uint256 nb_vote;} // on creer une liste candidat dans lequel on va prendre un nom et un nb de vote\r\n\r\n    address public owner;\r\n    bool public voteOuvert;\r\n\r\n    Candidate[] public candidates; // on creer une liste candidat\r\n\r\n    mapping(address => bool) public isVotant;           // on regarde si l'adresse est un votant ou non\r\n    mapping(address => bool) public aVoter;             // on regarde si l'adresse à deja voter ou non\r\n    mapping(address => uint256) public voterToken;      // adresse lier au tokenId recu au vote (si =0 alors pas voté)\r\n    mapping(uint256 => uint256) public voterCandidat;   // lie le jeton token au candidat\r\n\r\n    //==================Lecture des candidats===============\r\n    function getNbCandidat() external view returns (uint256) {\r\n        return candidates.length;\r\n    }\r\n\r\n    function getCandidat(uint256 idCandidat) external view returns (string memory candidateName, uint256 nb_vote)\r\n    {\r\n        require(idCandidat < candidates.length, \"Candidat inexistant dans les candidats participant\");\r\n        Candidate memory c = candidates[idCandidat];\r\n        return (c.name, c.nb_vote);\r\n    }\r\n\r\n    //===========Gestion du process de vote=================\r\n\r\n    event VotantAjouter(address indexed voter); // Evenement pour dire qu'on a ajouter un votant\r\n    event VoteCommencer();                      // Evenement pour dire que les votes ont commencé\r\n\r\n    modifier onlyOwner() {  // permet de rajouter une condirion a une fonctionpour que suel l'admin puisse y acceder\r\n        require(msg.sender == owner, \"Pas l'Owner\");\r\n        _;\r\n    }\r\n\r\n    modifier onlyVoter() {  // pareil pour les votants\r\n        require(isVotant[msg.sender], \"Ne peut pas voter\");\r\n        _;\r\n    }\r\n\r\n    modifier votingIsOpen() {   // pareil quand les votes sont ouverts\r\n        require(voteOuvert, \"Les votes ne sont pas ouvert\");\r\n        _;\r\n    }\r\n\r\n    constructor(string[] memory candidateNames) {  // on prend une liste de candidat en parametre qui seront ceux pour qui on peut voter\r\n        require(candidateNames.length >= 2, \"Need at least 2 candidates\");\r\n\r\n        owner = msg.sender;\r\n        idToken = 1; // les token_Id commencent à 1\r\n\r\n        for (uint256 i = 0; i < candidateNames.length; i++) {\r\n            candidates.push(Candidate({ name: candidateNames[i], nb_vote: 0 })); // on les mets dans la liste des candidat avec le nb de vote recu\r\n        }\r\n    }\r\n\r\n    function addVoter(address votant) external onlyOwner { // on permet a l'admin uniquement d'ajouter des votant\r\n        require(votant != address(0), \"Aucune adresse renseignee\");\r\n        require(!isVotant[votant], \"Adresse est deja un votant\");\r\n        isVotant[votant] = true;\r\n        emit VotantAjouter(votant);\r\n    }\r\n\r\n    function startVote() external onlyOwner { // Permet d'ouvrir les vote\r\n        require(!voteOuvert, \"Les votes sont deja ouvert\");\r\n        voteOuvert = true;\r\n        emit VoteCommencer();\r\n    }\r\n\r\n    function vote(uint256 candidateId) external onlyVoter votingIsOpen { // permet au votant de voter\r\n        require(!aVoter[msg.sender], \"A deja vote\");\r\n        require(candidateId < candidates.length, \"Candidat inexistant\");\r\n        aVoter[msg.sender]= true;               // il a voter\r\n        candidates[candidateId].nb_vote += 1;  // +1 vote pour celui qui vote\r\n        uint256 tokenId = idToken;\r\n        idToken += 1;                           // Jeton +1\r\n        voterToken[msg.sender]= tokenId;  \r\n        voterCandidat[tokenId]= candidateId;    // on inscris qui a vote avec ce token\r\n\r\n        _mint(msg.sender, tokenId);\r\n    }\r\n}"
+      }
+    }
+  }
+}
