@@ -36,4 +36,27 @@ describe("Vote", function () {
             }
         });
     });
+    describe("Gestion des votes", function () {
+        it("L'admin peut ajouter des votes", async function () {
+            await expect(vote.addVoter(votant1.address)).to.emit(vote, "VotantAjouter").withArgs(votant1.address);
+            expect(await vote.isVotant(votant1.address)).to.be.true;
+        });
+
+        it("Qqn qui n'est pas l'admin ne peut pas ajouter de votant", async function () {
+            await expect(vote.connect(votant1).addVoter(votant2.address)).to.be.revertedWith("Pas l'Owner");
+        });
+
+        it("On ne peut pas ajouter le meme votant 2 fois", async function () {
+            await vote.addVoter(votant1.address);
+            await expect(vote.addVoter(votant1.address)).to.be.revertedWith("Adresse est deja un votant");
+        });
+        
+        it("On peut voter une fois que les votes sont ouverts", async function () {
+            await vote.addVoter(votant1.address);
+            await expect(vote.startVote()).to.emit(vote, "VoteCommencer");
+            await vote.connect(votant1).vote(1);
+            const [nom, nbVotes] = await vote.getCandidat(1);
+            expect(nbVotes).to.equal(1n);
+        });
+    });
 });
