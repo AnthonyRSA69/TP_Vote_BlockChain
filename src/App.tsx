@@ -1,25 +1,30 @@
 import { useState } from 'react'
 import './App.css'
+import { useVoting } from './hooks/useVoting'
 
 function App() {
-  // État de connexion
-  const [isConnected, setIsConnected] = useState(true)
+  // Hook MetaMask
+  const { userAddress, connectWallet, disconnectWallet } = useVoting()
+  
+  // État de l'app
   const [showUserMenu, setShowUserMenu] = useState(false)
-  const [userAddress] = useState<string | null>('0x1234567890abcdef')
-  const [userName] = useState('Alice')
   const [isAdmin] = useState(true)
   const [isVoter] = useState(true)
   const [votingOpen, setVotingOpen] = useState(true)
   const [selectedCandidate, setSelectedCandidate] = useState<number | null>(null)
   const [userHasVoted] = useState(false)
   
+  // Vérifier si connecté
+  const isConnected = userAddress !== null
+  const userName = userAddress ? `${userAddress.slice(0, 6)}...${userAddress.slice(-4)}` : 'Connecter'
+  
   // Fonctions de connexion/déconnexion
-  const handleConnect = () => {
-    setIsConnected(true)
+  const handleConnect = async () => {
+    await connectWallet()
   }
 
   const handleDisconnect = () => {
-    setIsConnected(false)
+    disconnectWallet()
     setShowUserMenu(false)
   }
 
